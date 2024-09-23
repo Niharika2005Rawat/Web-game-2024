@@ -1,0 +1,96 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #e0bbff; 
+    background-image: repeating-linear-gradient(
+        45deg, 
+        transparent 0, 
+        transparent 40px, 
+        rgba(0, 0, 0, 0.1) 40px, 
+        rgba(0, 0, 0, 0.1) 80px
+    ), 
+    repeating-linear-gradient(
+        135deg, 
+        transparent 0, 
+        transparent 40px, 
+        rgba(0, 0, 0, 0.1) 40px, 
+        rgba(0, 0, 0, 0.1) 80px
+    ); 
+}
+
+.game-container {
+    text-align: center;
+    position: relative;
+    z-index: 10; 
+}
+
+h1 {
+    font-size: 2rem;
+    color: #4b0082; 
+}
+
+.score-container {
+    margin-bottom: 10px;
+}
+
+#score {
+    font-size: 1.5rem;
+    background-color: #7a42f4; 
+    padding: 10px;
+    color: white;
+    border-radius: 5px;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 100px); 
+    grid-template-rows: repeat(5, 100px); 
+    gap: 10px;
+    background-color: #4b0082; 
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.tile {
+    width: 100px;
+    height: 100px;
+    background-color: #d1b3ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.tile-2 { background-color: #e1ccec; color: #4b0082; }
+.tile-4 { background-color: #d1b3ff; color: #4b0082; }
+.tile-8 { background-color: #bf80ff; color: #ffffff; }
+
+body:before {
+    content: "N";
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 6rem;
+    color: rgba(0, 0, 0, 0.05); 
+    z-index: 1; 
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 100px);
+    grid-template-rows: repeat(auto-fill, 100px);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    pointer-events: none;
+}
