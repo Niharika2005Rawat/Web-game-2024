@@ -1,148 +1,96 @@
-const boardSize = 5; 
-let board = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
+const grid = document.getElementById('grid');
+const scoreDisplay = document.getElementById('score');
+let board = Array(4).fill(null).map(() => Array(4).fill(0));
 let score = 0;
 
-document.addEventListener('DOMContentLoaded', () => {
-    initGame();
-    document.addEventListener('keydown', handleInput);
-});
-
-function initGame() {
+function init() {
     addRandomTile();
     addRandomTile();
-    updateBoard();
+    render();
+    document.addEventListener('keydown', handleKey);
 }
 
 function addRandomTile() {
     let emptyTiles = [];
-    for (let row = 0; row < boardSize; row++) {
-        for (let col = 0; col < boardSize; col++) {
-            if (board[row][col] === 0) {
-                emptyTiles.push({ row, col });
-            }
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (board[i][j] === 0) emptyTiles.push({ x: i, y: j });
         }
     }
-    if (emptyTiles.length === 0) return;
-    const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-    board[randomTile.row][randomTile.col] = Math.random() < 0.9 ? 2 : 4;
-}
-
-function updateBoard() {
-    const gameBoard = document.getElementById('game-board');
-    gameBoard.innerHTML = ''; // Clear the board first
-    for (let row = 0; row < boardSize; row++) {
-        for (let col = 0; col < boardSize; col++) {
-            const tile = document.createElement('div');
-            tile.classList.add('tile');
-            if (board[row][col] > 0) {
-                tile.classList.add(`tile-${board[row][col]}`);
-                tile.textContent = board[row][col];
-            }
-            gameBoard.appendChild(tile);
-        }
-    }
-    document.getElementById('score').textContent = `Final score of the player: ${score}`;
-}
-
-function handleInput(event) {
-    switch (event.key) {
-        case 'ArrowLeft':
-            moveLeft();
-            break;
-        case 'ArrowRight':
-            moveRight();
-            break;
-        case 'ArrowUp':
-            moveUp();
-            break;
-        case 'ArrowDown':
-            moveDown();
-            break;
-        default:
-            return;
-    }
-    addRandomTile(); 
-    updateBoard(); 
-}
-
-function moveLeft() {
-    for (let row = 0; row < boardSize; row++) {
-        let filteredRow = board[row].filter(val => val); 
-        for (let col = 0; col < filteredRow.length - 1; col++) {
-            if (filteredRow[col] === filteredRow[col + 1]) { 
-                filteredRow[col] *= 2;
-                score += filteredRow[col];
-                filteredRow.splice(col + 1, 1); 
-            }
-        }
-        while (filteredRow.length < boardSize) {
-            filteredRow.push(0); 
-        }
-        board[row] = filteredRow; 
+    if (emptyTiles.length) {
+        const { x, y } = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+        board[x][y] = Math.random() < 0.9 ? 2 : 4;
     }
 }
 
-function moveRight() {
-    for (let row = 0; row < boardSize; row++) {
-        let filteredRow = board[row].filter(val => val);
-        for (let col = filteredRow.length - 1; col > 0; col--) {
-            if (filteredRow[col] === filteredRow[col - 1]) { 
-                filteredRow[col] *= 2; 
-                score += filteredRow[col]; 
-                filteredRow.splice(col - 1, 1); 
-            }
-        }
-        while (filteredRow.length < boardSize) {
-            filteredRow.unshift(0); 
-        }
-        board[row] = filteredRow; 
+function handleKey(event) {
+    let moved = false;
+    if (event.key === 'ArrowUp') moved = move('up');
+    if (event.key === 'ArrowDown') moved = move('down');
+    if (event.key === 'ArrowLeft') moved = move('left');
+    if (event.key === 'ArrowRight') moved = move('right');
+
+    if (moved) {
+        addRandomTile();
+        render();
     }
 }
 
-function moveUp() {
-    for (let col = 0; col < boardSize; col++) {
-        let column = [];
-        for (let row = 0; row < boardSize; row++) {
-            if (board[row][col] !== 0) {
-                column.push(board[row][col]);
-            }
+function move(direction) {
+    let moved = false;
+    let tempBoard = board.map(row => row.slice());
+
+    for (let i = 0; i < 4; i++) {
+        let row = getRow(i, direction);
+        let newRow = slideAndMerge(row);
+        if (newRow.join(',') !== row.join(',')) {
+            moved = true;
+            setRow(i, newRow, direction);
         }
-        for (let row = 0; row < column.length - 1; row++) {
-            if (column[row] === column[row + 1]) {
-                column[row] *= 2;
-                score += column[row];
-                column.splice(row + 1, 1);
-            }
-        }
-        while (column.length < boardSize) {
-            column.push(0);
-        }
-        for (let row = 0; row < boardSize; row++) {
-            board[row][col] = column[row];
-        }
+    }
+    return moved;
+}
+
+function getRow(index, direction) {
+    if (direction === 'up') return [board[0][index], board[1][index], board[2][index], board[3][index]];
+    if (direction === 'down') return [board[3][index], board[2][index], board[1][index], board[0][index]];
+    return board[index];
+}
+
+function setRow(index, newRow, direction) {
+    if (direction === 'up') {
+        for (let j = 0; j < 4; j++) board[j][index] = newRow[j];
+    } else if (direction === 'down') {
+        for (let j = 0; j < 4; j++) board[3 - j][index] = newRow[j];
+    } else {
+        board[index] = newRow;
     }
 }
 
-function moveDown() {
-    for (let col = 0; col < boardSize; col++) {
-        let column = [];
-        for (let row = 0; row < boardSize; row++) {
-            if (board[row][col] !== 0) {
-                column.push(board[row][col]);
-            }
-        }
-        for (let row = column.length - 1; row > 0; row--) {
-            if (column[row] === column[row - 1]) {
-                column[row] *= 2;
-                score += column[row];
-                column.splice(row - 1, 1);
-            }
-        }
-        while (column.length < boardSize) {
-            column.unshift(0);
-        }
-        for (let row = 0; row < boardSize; row++) {
-            board[row][col] = column[row];
+function slideAndMerge(row) {
+    let newRow = row.filter(num => num);
+    for (let i = 0; i < newRow.length - 1; i++) {
+        if (newRow[i] === newRow[i + 1]) {
+            newRow[i] *= 2;
+            score += newRow[i];
+            newRow.splice(i + 1, 1);
         }
     }
+    return newRow.concat(Array(4 - newRow.length).fill(0));
 }
+
+function render() {
+    grid.innerHTML = '';
+    board.forEach(row => {
+        row.forEach(value => {
+            const box = document.createElement('div');
+            box.className = 'box';
+            box.dataset.value = value;
+            box.textContent = value !== 0 ? value : '';
+            grid.appendChild(box);
+        });
+    });
+    scoreDisplay.textContent = score;
+}
+
+init();
